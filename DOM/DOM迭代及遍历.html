@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <li>hello</li>
+        <div>class</div>
+        <div class="hello">hello</div>
+    </div>
+    <script>
+        // nodeIterator
+        const nodeIterator = document.createNodeIterator(
+            document.querySelector('#app'),
+            NodeFilter.SHOW_ALL, // 全节点
+            function(node) {
+                return node.nodeType === NodeFilter.SHOW_ELEMENT;
+            }
+        );
+        console.log(nodeIterator.nextNode());
+        console.log(nodeIterator.previousNode());
+        console.log(nodeIterator.nextNode());
+        console.log(nodeIterator.nextNode());
+
+        // TreeWalker
+        const treeWalker = document.createTreeWalker(
+            document.querySelector('#app'),
+            NodeFilter.SHOW_ALL, // 全节点
+            function(node) {
+                return node.nodeType === NodeFilter.SHOW_ELEMENT;
+            }
+        );
+        console.log(treeWalker.nextNode());
+        console.log(treeWalker.previousNode());
+        console.log(treeWalker.nextNode());
+        console.log(treeWalker.nextNode());
+        console.log(treeWalker.parentNode());
+        console.log(treeWalker.firstChild());
+        console.log(treeWalker.parentNode());
+        console.log(treeWalker.lastChild());
+        console.log(treeWalker.previousSibling());
+        console.log(treeWalker.nextSibling());
+    </script>
+</body>
+</html>

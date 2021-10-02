@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="hello">
+        <p>hello world!</p>
+        <p>你好</p>
+        <p>大家好</p>
+        <p>nonon</p>
+    </div>
+    <script>
+        const type = (item) => Reflect.toString.call(item).replace(/\[|\]/g, '').split(' ')[1];
+        const oHello = document.querySelector('.hello');
+        const oHelloP = oHello.querySelectorAll('p');
+        const observer = new MutationObserver((mutationRecordList) => {
+            console.log(mutationRecordList);
+        });
+        observer.observe(oHello, {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            attributeOldValue: true,
+            subtree: true,
+            attributeFilter: ['className', 'style', 'name', 'color'],
+            characterDataOldValue: true,
+        });
+        console.log(type(oHelloP));
+        const fnName = ['setAttribute', 'removeAttribute'];
+        let i = 0;
+        let timer;
+        const timeoutFn = () => {
+            oHelloP.item(0)[fnName[i % 2]]('name', '很棒');
+            i++;
+            if (i < 10) {
+                setTimeout(timeoutFn, 2000);
+            }
+        };
+        setTimeout(timeoutFn, 2000);
+        
+        oHelloP.item(0).setAttribute('sex', '很棒');
+        oHelloP.item(1).firstChild.textContent = '123';
+        document.body.appendChild(oHelloP.item(2));
+        document.body.removeChild(oHelloP.item(2));
+        oHello.insertBefore(oHelloP.item(3), oHello.firstChild);
+        setTimeout(() => {
+            const records = observer.takeRecords();
+            console.log(records);
+            observer.disconnect();
+        }, 5000);
+        
+
+    </script>
+</body>
+</html>

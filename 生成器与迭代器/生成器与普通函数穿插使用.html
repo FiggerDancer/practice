@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function * genFn(initial, max) {
+            if (initial < max) {
+                yield* genFn(initial + 1, max);
+                yield initial + 1;
+            }
+        }
+
+        const gen = genFn(10, 20);
+        let id;
+        function requestAnimaionFn() {
+            const { value, done } = gen.next();
+            console.log('requestAnimationFrame:', value, done);
+            if (done) {
+                cancelAnimationFrame(id);
+                console.log('finished');
+                return;
+            }
+            id = requestAnimationFrame(requestAnimaionFn)
+        }
+        id = requestAnimationFrame(requestAnimaionFn);
+        for (let i = 0; i < 10; i++) {
+            console.log('sdf');
+        }
+
+        
+    </script>
+</body>
+</html>

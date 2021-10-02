@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .gif1 {
+        
+    }
+</style>
+<body>
+    <div>
+        <img class="gif1" src="./clock.gif"></img>
+        <img class="gif2"></img>
+        <div class="hello">
+            hello worldd!
+            hello world!
+        </div>
+    </div>
+    <script>
+        requestIdleCallback(() => {
+            console.log('idle')
+        }, {timeout: 2000});
+        requestAnimationFrame(() => {
+            console.log('animation');
+        });
+        const oHello = document.querySelector('.hello');
+        console.dir(oHello.firstChild)
+    function keepTwoDecimal(num) {
+        let result = parseFloat(num);
+        console.log(result);
+        if (Number.isNaN(result)) {
+            return false;
+        }
+        result = Math.round(num * 100) / 100;
+        return result;
+    }
+
+    function leftLargeEqualRight(currentVersion, minimumVersion){
+    const c = currentVersion.split('.');   //4 0 0
+    const m = minimumVersion.split('.');   //3 2 2
+    var f = true;  // 默认大于最低版本号
+    for( var i = 0, l = m.length; i < l; i++ ){
+        var t = ( c[i] || 0 ) - 0;
+        var _m = m[i] - 0;
+        if( t > _m ){
+            break;
+        }else if( t < _m ) {
+            f = false;
+            break;
+        };
+    }
+    return f;
+}
+
+function versionJudgment(currentVersion, minimumVersion, maxVersion) {
+    return (leftLargeEqualRight(currentVersion, minimumVersion) && leftLargeEqualRight(maxVersion, currentVersion));
+}
+
+
+function adjustScore(oldJson) {
+    oldJson.version = '2.11.3';
+    if (!oldJson.version || !versionJudgment(oldJson.version, '2.9.0', '2.11.2')) return oldJson;
+    const objString = JSON.stringify(oldJson);
+    const tempJson = JSON.parse(objString);
+    const newJson = oldJson;
+    let newScore;
+    const wzd = [];
+    let l = 0;
+    if (!Array.isArray(tempJson.sentences)) {
+        return newJson;
+    }
+    for (let i = 0; i < tempJson.sentences[0].words.length; i++) {
+        if (tempJson.sentences[0].words[i].score > 25) {
+            wzd[l] = tempJson.sentences[0].words[i].score;
+            l++;
+        }
+    }
+    const aa = wzd.length / tempJson.sentences[0].words.length * 100;
+
+    newJson.completion = aa;
+
+    newScore = 0.7 * tempJson.pronounce + 0.2 * aa + 0.1 * tempJson.fluency;
+
+    if (newScore > 87.5) {
+        newScore = 100;
+    } else if (newScore >= 70) {
+        newScore = 12 / 7 * newScore - 50;
+    }
+
+    console.log(newScore);
+
+    newJson.score = keepTwoDecimal(newScore);
+
+    const oldNewScoreRatio = newJson.score / (tempJson.score + 0.000000000000000001);
+
+    for (let i = 0; i < newJson.sentences[0].words.length; i++) {
+        let gzh = oldNewScoreRatio * newJson.sentences[0].words[i].score;
+        if (gzh > 100) {
+            gzh = 100;
+        }
+        newJson.sentences[0].words[i].score = keepTwoDecimal(gzh);
+    }
+
+    return newJson;
+}
+
+const json = 
+{
+    "engine_type": "PART_A",
+    "version": "2.2.1",
+    "score_type": "PARA",
+    "audio_quality": 1,
+    "MD5": "",
+    "score": 80.61,
+    "isReject": 0,
+    "rhythm": 69.75,
+    "pronounce": 80.61,
+    "completion": 100,
+    "sentences": [
+        {
+            "score": 71.0,
+            "isReject": 0,
+            "rhythm": 58.09,
+            "pronounce": 71.0,
+            "completion": 85,
+            "fluency": 58.09,
+            "text": "What do you usually do on weekends? ",
+            "words": [
+                {
+                    "content": "What",
+                    "score": 76.31,
+                    "pronounce": 76.31,
+                    "start": 0,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 77.75
+                        },
+                        {
+                            "phone_ipa": "ʌ",
+                            "phone_id": 268435457,
+                            "phone_score": 77.71
+                        },
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 73.46
+                        }
+                    ]
+                },
+                {
+                    "content": "do",
+                    "score": 76.31,
+                    "pronounce": 76.31,
+                    "start": 5,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 93.72
+                        },
+                        {
+                            "phone_ipa": "u",
+                            "phone_id": 268435464,
+                            "phone_score": 58.9
+                        }
+                    ]
+                },
+                {
+                    "content": "you",
+                    "score": 81.46,
+                    "pronounce": 81.46,
+                    "start": 8,
+                    "length": 3,
+                    "pho": [
+                        {
+                            "phone_ipa": "j",
+                            "phone_id": 536870938,
+                            "phone_score": 98.04
+                        },
+                        {
+                            "phone_ipa": "uː",
+                            "phone_id": 268435465,
+                            "phone_score": 64.87
+                        }
+                    ]
+                },
+                {
+                    "content": "usually",
+                    "score": 50.25,
+                    "pronounce": 50.25,
+                    "start": 12,
+                    "length": 7,
+                    "pho": [
+                        {
+                            "phone_ipa": "j",
+                            "phone_id": 536870938,
+                            "phone_score": 66.52
+                        },
+                        {
+                            "phone_ipa": "uː",
+                            "phone_id": 268435465,
+                            "phone_score": 19.7
+                        },
+                        {
+                            "phone_ipa": "ʒ",
+                            "phone_id": 536870925,
+                            "phone_score": 36.51
+                        },
+                        {
+                            "phone_ipa": "uə",
+                            "phone_id": 268435475,
+                            "phone_score": 32.31
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 88.32
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 76.06
+                        }
+                    ]
+                },
+                {
+                    "content": "do",
+                    "score": 74.78,
+                    "pronounce": 74.78,
+                    "start": 20,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 80.67
+                        },
+                        {
+                            "phone_ipa": "ʌ",
+                            "phone_id": 268435457,
+                            "phone_score": 68.9
+                        }
+                    ]
+                },
+                {
+                    "content": "on",
+                    "score": 71.2,
+                    "pronounce": 71.2,
+                    "start": 23,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 75.03
+                        },
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 67.38
+                        }
+                    ]
+                },
+                {
+                    "content": "weekends",
+                    "score": 66.7,
+                    "pronounce": 66.7,
+                    "start": 26,
+                    "length": 8,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 93.58
+                        },
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 68.53
+                        },
+                        {
+                            "phone_ipa": "k",
+                            "phone_id": 536870916,
+                            "phone_score": 77.75
+                        },
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 72.51
+                        },
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 12.03
+                        },
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 61.64
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 80.85
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 87.51,
+            "isReject": 0,
+            "rhythm": 66.82,
+            "pronounce": 87.51,
+            "completion": 100,
+            "fluency": 66.82,
+            "text": "I sometimes go shopping. ",
+            "words": [
+                {
+                    "content": "I",
+                    "score": 83.7,
+                    "pronounce": 83.7,
+                    "start": 0,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 83.7
+                        }
+                    ]
+                },
+                {
+                    "content": "sometimes",
+                    "score": 89.34,
+                    "pronounce": 89.34,
+                    "start": 2,
+                    "length": 9,
+                    "pho": [
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 96.4
+                        },
+                        {
+                            "phone_ipa": "ʌ",
+                            "phone_id": 268435457,
+                            "phone_score": 97.37
+                        },
+                        {
+                            "phone_ipa": "m",
+                            "phone_id": 536870934,
+                            "phone_score": 85.84
+                        },
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 82.05
+                        },
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 80.4
+                        },
+                        {
+                            "phone_ipa": "m",
+                            "phone_id": 536870934,
+                            "phone_score": 88.13
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 95.22
+                        }
+                    ]
+                },
+                {
+                    "content": "go",
+                    "score": 91.52,
+                    "pronounce": 91.52,
+                    "start": 12,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɡ",
+                            "phone_id": 536870917,
+                            "phone_score": 96.08
+                        },
+                        {
+                            "phone_ipa": "əu",
+                            "phone_id": 268435472,
+                            "phone_score": 86.97
+                        }
+                    ]
+                },
+                {
+                    "content": "shopping",
+                    "score": 85.49,
+                    "pronounce": 85.49,
+                    "start": 15,
+                    "length": 8,
+                    "pho": [
+                        {
+                            "phone_ipa": "ʃ",
+                            "phone_id": 536870924,
+                            "phone_score": 98.44
+                        },
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 73.25
+                        },
+                        {
+                            "phone_ipa": "b",
+                            "phone_id": 536870913,
+                            "phone_score": 87.22
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 91.82
+                        },
+                        {
+                            "phone_ipa": "ŋ",
+                            "phone_id": 536870936,
+                            "phone_score": 76.75
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 81.03,
+            "isReject": 0,
+            "rhythm": 65.28,
+            "pronounce": 81.03,
+            "completion": 100,
+            "fluency": 65.28,
+            "text": "I never go shopping. I usually watch TV. ",
+            "words": [
+                {
+                    "content": "I",
+                    "score": 74.79,
+                    "pronounce": 74.79,
+                    "start": 0,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 74.79
+                        }
+                    ]
+                },
+                {
+                    "content": "never",
+                    "score": 74.42,
+                    "pronounce": 74.42,
+                    "start": 2,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 73.62
+                        },
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 87.27
+                        },
+                        {
+                            "phone_ipa": "v",
+                            "phone_id": 536870919,
+                            "phone_score": 67.96
+                        },
+                        {
+                            "phone_ipa": "ə",
+                            "phone_id": 268435466,
+                            "phone_score": 68.82
+                        }
+                    ]
+                },
+                {
+                    "content": "go",
+                    "score": 90.3,
+                    "pronounce": 90.3,
+                    "start": 8,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɡ",
+                            "phone_id": 536870917,
+                            "phone_score": 96.42
+                        },
+                        {
+                            "phone_ipa": "əu",
+                            "phone_id": 268435472,
+                            "phone_score": 84.18
+                        }
+                    ]
+                },
+                {
+                    "content": "shopping",
+                    "score": 88.47,
+                    "pronounce": 88.47,
+                    "start": 11,
+                    "length": 8,
+                    "pho": [
+                        {
+                            "phone_ipa": "ʃ",
+                            "phone_id": 536870924,
+                            "phone_score": 96.52
+                        },
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 72.49
+                        },
+                        {
+                            "phone_ipa": "b",
+                            "phone_id": 536870913,
+                            "phone_score": 86.0
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 99.41
+                        },
+                        {
+                            "phone_ipa": "ŋ",
+                            "phone_id": 536870936,
+                            "phone_score": 87.92
+                        }
+                    ]
+                },
+                {
+                    "content": "I",
+                    "score": 80.95,
+                    "pronounce": 80.95,
+                    "start": 21,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 80.95
+                        }
+                    ]
+                },
+                {
+                    "content": "usually",
+                    "score": 66.33,
+                    "pronounce": 66.33,
+                    "start": 23,
+                    "length": 7,
+                    "pho": [
+                        {
+                            "phone_ipa": "j",
+                            "phone_id": 536870938,
+                            "phone_score": 98.4
+                        },
+                        {
+                            "phone_ipa": "uː",
+                            "phone_id": 268435465,
+                            "phone_score": 71.32
+                        },
+                        {
+                            "phone_ipa": "ʒ",
+                            "phone_id": 536870925,
+                            "phone_score": 35.19
+                        },
+                        {
+                            "phone_ipa": "uə",
+                            "phone_id": 268435475,
+                            "phone_score": 37.71
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 85.27
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 98.71
+                        }
+                    ]
+                },
+                {
+                    "content": "watch",
+                    "score": 92.94,
+                    "pronounce": 92.94,
+                    "start": 31,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 99.61
+                        },
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 89.26
+                        },
+                        {
+                            "phone_ipa": "tʃ",
+                            "phone_id": 536870930,
+                            "phone_score": 89.95
+                        }
+                    ]
+                },
+                {
+                    "content": "TV",
+                    "score": 80.02,
+                    "pronounce": 80.02,
+                    "start": 37,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 95.63
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 73.28
+                        },
+                        {
+                            "phone_ipa": "v",
+                            "phone_id": 536870919,
+                            "phone_score": 69.69
+                        },
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 81.47
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 84.99,
+            "isReject": 0,
+            "rhythm": 84.06,
+            "pronounce": 84.99,
+            "completion": 100,
+            "fluency": 84.06,
+            "text": "I always exercise. ",
+            "words": [
+                {
+                    "content": "I",
+                    "score": 85.93,
+                    "pronounce": 85.93,
+                    "start": 0,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 85.93
+                        }
+                    ]
+                },
+                {
+                    "content": "always",
+                    "score": 87.32,
+                    "pronounce": 87.32,
+                    "start": 2,
+                    "length": 6,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 98.43
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 74.4
+                        },
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 78.96
+                        },
+                        {
+                            "phone_ipa": "ei",
+                            "phone_id": 268435468,
+                            "phone_score": 92.18
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 92.64
+                        }
+                    ]
+                },
+                {
+                    "content": "exercise",
+                    "score": 81.72,
+                    "pronounce": 81.72,
+                    "start": 9,
+                    "length": 8,
+                    "pho": [
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 85.0
+                        },
+                        {
+                            "phone_ipa": "k",
+                            "phone_id": 536870916,
+                            "phone_score": 63.49
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 69.02
+                        },
+                        {
+                            "phone_ipa": "ə",
+                            "phone_id": 268435466,
+                            "phone_score": 82.18
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 96.48
+                        },
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 85.82
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 90.03
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 74.75,
+            "isReject": 0,
+            "rhythm": 76.89,
+            "pronounce": 74.75,
+            "completion": 100,
+            "fluency": 76.89,
+            "text": "I often help with housework. ",
+            "words": [
+                {
+                    "content": "I",
+                    "score": 84.59,
+                    "pronounce": 84.59,
+                    "start": 0,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 84.59
+                        }
+                    ]
+                },
+                {
+                    "content": "often",
+                    "score": 83.7,
+                    "pronounce": 83.7,
+                    "start": 2,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 97.62
+                        },
+                        {
+                            "phone_ipa": "f",
+                            "phone_id": 536870918,
+                            "phone_score": 85.99
+                        },
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 67.48
+                        }
+                    ]
+                },
+                {
+                    "content": "help",
+                    "score": 65.68,
+                    "pronounce": 65.68,
+                    "start": 8,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "h",
+                            "phone_id": 536870927,
+                            "phone_score": 80.51
+                        },
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 56.5
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 34.96
+                        },
+                        {
+                            "phone_ipa": "p",
+                            "phone_id": 536870912,
+                            "phone_score": 90.76
+                        }
+                    ]
+                },
+                {
+                    "content": "with",
+                    "score": 73.77,
+                    "pronounce": 73.77,
+                    "start": 13,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 80.56
+                        },
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 79.39
+                        },
+                        {
+                            "phone_ipa": "ð",
+                            "phone_id": 536870923,
+                            "phone_score": 61.34
+                        }
+                    ]
+                },
+                {
+                    "content": "housework",
+                    "score": 66.02,
+                    "pronounce": 66.02,
+                    "start": 18,
+                    "length": 9,
+                    "pho": [
+                        {
+                            "phone_ipa": "h",
+                            "phone_id": 536870927,
+                            "phone_score": 51.36
+                        },
+                        {
+                            "phone_ipa": "au",
+                            "phone_id": 268435471,
+                            "phone_score": 0.0
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 85.39
+                        },
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 86.21
+                        },
+                        {
+                            "phone_ipa": "ə",
+                            "phone_id": 268435466,
+                            "phone_score": 80.04
+                        },
+                        {
+                            "phone_ipa": "k",
+                            "phone_id": 536870916,
+                            "phone_score": 93.15
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 86.18,
+            "isReject": 0,
+            "rhythm": 68.89,
+            "pronounce": 86.18,
+            "completion": 100,
+            "fluency": 68.89,
+            "text": "How about you? ",
+            "words": [
+                {
+                    "content": "How",
+                    "score": 85.99,
+                    "pronounce": 85.99,
+                    "start": 0,
+                    "length": 3,
+                    "pho": [
+                        {
+                            "phone_ipa": "h",
+                            "phone_id": 536870927,
+                            "phone_score": 91.07
+                        },
+                        {
+                            "phone_ipa": "au",
+                            "phone_id": 268435471,
+                            "phone_score": 80.91
+                        }
+                    ]
+                },
+                {
+                    "content": "about",
+                    "score": 91.63,
+                    "pronounce": 91.63,
+                    "start": 4,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "ə",
+                            "phone_id": 268435466,
+                            "phone_score": 99.44
+                        },
+                        {
+                            "phone_ipa": "b",
+                            "phone_id": 536870913,
+                            "phone_score": 97.43
+                        },
+                        {
+                            "phone_ipa": "au",
+                            "phone_id": 268435471,
+                            "phone_score": 84.08
+                        },
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 85.56
+                        }
+                    ]
+                },
+                {
+                    "content": "you",
+                    "score": 80.93,
+                    "pronounce": 80.93,
+                    "start": 10,
+                    "length": 3,
+                    "pho": [
+                        {
+                            "phone_ipa": "j",
+                            "phone_id": 536870938,
+                            "phone_score": 76.62
+                        },
+                        {
+                            "phone_ipa": "uː",
+                            "phone_id": 268435465,
+                            "phone_score": 85.23
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 79.44,
+            "isReject": 0,
+            "rhythm": 80.17,
+            "pronounce": 79.44,
+            "completion": 100,
+            "fluency": 80.17,
+            "text": "I hardly ever watch TV. I always read. ",
+            "words": [
+                {
+                    "content": "I",
+                    "score": 75.15,
+                    "pronounce": 75.15,
+                    "start": 0,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 75.15
+                        }
+                    ]
+                },
+                {
+                    "content": "hardly",
+                    "score": 83.61,
+                    "pronounce": 83.61,
+                    "start": 2,
+                    "length": 6,
+                    "pho": [
+                        {
+                            "phone_ipa": "h",
+                            "phone_id": 536870927,
+                            "phone_score": 82.01
+                        },
+                        {
+                            "phone_ipa": "ɑː",
+                            "phone_id": 268435456,
+                            "phone_score": 91.64
+                        },
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 87.87
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 73.0
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 75.49
+                        }
+                    ]
+                },
+                {
+                    "content": "ever",
+                    "score": 76.48,
+                    "pronounce": 76.48,
+                    "start": 9,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 86.89
+                        },
+                        {
+                            "phone_ipa": "v",
+                            "phone_id": 536870919,
+                            "phone_score": 69.42
+                        },
+                        {
+                            "phone_ipa": "ə",
+                            "phone_id": 268435466,
+                            "phone_score": 73.14
+                        }
+                    ]
+                },
+                {
+                    "content": "watch",
+                    "score": 83.59,
+                    "pronounce": 83.59,
+                    "start": 14,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 92.17
+                        },
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 80.33
+                        },
+                        {
+                            "phone_ipa": "tʃ",
+                            "phone_id": 536870930,
+                            "phone_score": 78.29
+                        }
+                    ]
+                },
+                {
+                    "content": "TV",
+                    "score": 78.22,
+                    "pronounce": 78.22,
+                    "start": 20,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 99.95
+                        },
+                        {
+                            "phone_ipa": "i",
+                            "phone_id": 268435461,
+                            "phone_score": 64.32
+                        },
+                        {
+                            "phone_ipa": "v",
+                            "phone_id": 536870919,
+                            "phone_score": 64.84
+                        },
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 83.78
+                        }
+                    ]
+                },
+                {
+                    "content": "I",
+                    "score": 75.63,
+                    "pronounce": 75.63,
+                    "start": 24,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 75.63
+                        }
+                    ]
+                },
+                {
+                    "content": "always",
+                    "score": 88.72,
+                    "pronounce": 88.72,
+                    "start": 26,
+                    "length": 6,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 88.64
+                        },
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 70.18
+                        },
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 91.87
+                        },
+                        {
+                            "phone_ipa": "ei",
+                            "phone_id": 268435468,
+                            "phone_score": 94.28
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 98.64
+                        }
+                    ]
+                },
+                {
+                    "content": "read",
+                    "score": 74.14,
+                    "pronounce": 74.14,
+                    "start": 33,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "r",
+                            "phone_id": 536870926,
+                            "phone_score": 91.47
+                        },
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 66.04
+                        },
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 64.91
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 77.78,
+            "isReject": 0,
+            "rhythm": 61.01,
+            "pronounce": 77.78,
+            "completion": 100,
+            "fluency": 61.01,
+            "text": "Oh, why is that? ",
+            "words": [
+                {
+                    "content": "Oh",
+                    "score": 92.24,
+                    "pronounce": 92.24,
+                    "start": 0,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "əu",
+                            "phone_id": 268435472,
+                            "phone_score": 92.24
+                        }
+                    ]
+                },
+                {
+                    "content": "why",
+                    "score": 80.68,
+                    "pronounce": 80.68,
+                    "start": 4,
+                    "length": 3,
+                    "pho": [
+                        {
+                            "phone_ipa": "w",
+                            "phone_id": 536870937,
+                            "phone_score": 86.44
+                        },
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 74.92
+                        }
+                    ]
+                },
+                {
+                    "content": "is",
+                    "score": 60.99,
+                    "pronounce": 60.99,
+                    "start": 8,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "iː",
+                            "phone_id": 268435460,
+                            "phone_score": 61.04
+                        },
+                        {
+                            "phone_ipa": "z",
+                            "phone_id": 536870921,
+                            "phone_score": 60.95
+                        }
+                    ]
+                },
+                {
+                    "content": "that",
+                    "score": 77.21,
+                    "pronounce": 77.21,
+                    "start": 11,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "ð",
+                            "phone_id": 536870923,
+                            "phone_score": 63.2
+                        },
+                        {
+                            "phone_ipa": "æ",
+                            "phone_id": 268435458,
+                            "phone_score": 76.71
+                        },
+                        {
+                            "phone_ipa": "t",
+                            "phone_id": 536870914,
+                            "phone_score": 91.73
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "score": 82.83,
+            "isReject": 0,
+            "rhythm": 66.55,
+            "pronounce": 82.83,
+            "completion": 100,
+            "fluency": 66.55,
+            "text": "Oh, I don't know. I guess I just like books. ",
+            "words": [
+                {
+                    "content": "Oh",
+                    "score": 92.07,
+                    "pronounce": 92.07,
+                    "start": 0,
+                    "length": 2,
+                    "pho": [
+                        {
+                            "phone_ipa": "əu",
+                            "phone_id": 268435472,
+                            "phone_score": 92.07
+                        }
+                    ]
+                },
+                {
+                    "content": "I",
+                    "score": 92.56,
+                    "pronounce": 92.56,
+                    "start": 4,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 92.56
+                        }
+                    ]
+                },
+                {
+                    "content": "don't",
+                    "score": 92.55,
+                    "pronounce": 92.55,
+                    "start": 6,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "d",
+                            "phone_id": 536870915,
+                            "phone_score": 96.33
+                        },
+                        {
+                            "phone_ipa": "ɔ",
+                            "phone_id": 268435463,
+                            "phone_score": 94.39
+                        },
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 86.92
+                        }
+                    ]
+                },
+                {
+                    "content": "know",
+                    "score": 90.65,
+                    "pronounce": 90.65,
+                    "start": 12,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "n",
+                            "phone_id": 536870935,
+                            "phone_score": 94.11
+                        },
+                        {
+                            "phone_ipa": "əu",
+                            "phone_id": 268435472,
+                            "phone_score": 87.18
+                        }
+                    ]
+                },
+                {
+                    "content": "I",
+                    "score": 71.27,
+                    "pronounce": 71.27,
+                    "start": 18,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 71.27
+                        }
+                    ]
+                },
+                {
+                    "content": "guess",
+                    "score": 71.69,
+                    "pronounce": 71.69,
+                    "start": 20,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "ɡ",
+                            "phone_id": 536870917,
+                            "phone_score": 69.7
+                        },
+                        {
+                            "phone_ipa": "e",
+                            "phone_id": 268435459,
+                            "phone_score": 58.27
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 87.11
+                        }
+                    ]
+                },
+                {
+                    "content": "I",
+                    "score": 75.26,
+                    "pronounce": 75.26,
+                    "start": 26,
+                    "length": 1,
+                    "pho": [
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 75.26
+                        }
+                    ]
+                },
+                {
+                    "content": "just",
+                    "score": 94.0,
+                    "pronounce": 94.0,
+                    "start": 28,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "dʒ",
+                            "phone_id": 536870931,
+                            "phone_score": 93.61
+                        },
+                        {
+                            "phone_ipa": "ʌ",
+                            "phone_id": 268435457,
+                            "phone_score": 91.18
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 97.21
+                        }
+                    ]
+                },
+                {
+                    "content": "like",
+                    "score": 78.37,
+                    "pronounce": 78.37,
+                    "start": 33,
+                    "length": 4,
+                    "pho": [
+                        {
+                            "phone_ipa": "l",
+                            "phone_id": 536870939,
+                            "phone_score": 84.37
+                        },
+                        {
+                            "phone_ipa": "ai",
+                            "phone_id": 268435469,
+                            "phone_score": 76.68
+                        },
+                        {
+                            "phone_ipa": "k",
+                            "phone_id": 536870916,
+                            "phone_score": 74.06
+                        }
+                    ]
+                },
+                {
+                    "content": "books",
+                    "score": 69.92,
+                    "pronounce": 69.92,
+                    "start": 38,
+                    "length": 5,
+                    "pho": [
+                        {
+                            "phone_ipa": "b",
+                            "phone_id": 536870913,
+                            "phone_score": 85.08
+                        },
+                        {
+                            "phone_ipa": "u",
+                            "phone_id": 268435464,
+                            "phone_score": 93.09
+                        },
+                        {
+                            "phone_ipa": "k",
+                            "phone_id": 536870916,
+                            "phone_score": 38.5
+                        },
+                        {
+                            "phone_ipa": "s",
+                            "phone_id": 536870920,
+                            "phone_score": 63.03
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+const str = adjustScore(json);
+console.log(str);
+
+    </script>
+</body>
+</html>

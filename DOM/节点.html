@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原始title</title>
+</head>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+<body>
+    <ul class="ul">
+        <li class="li" name="001">001</li>
+        <li class="li">002</li>
+        <li class="li">003</li>
+        <li class="li">004</li>
+        <li class="li">005</li>
+        <li class="li">006</li>
+        <li class="li">002</li>
+        <li class="li">003</li>
+        <li class="li">004</li>
+        <li class="li">005</li>
+        <li class="li">006</li>
+        <li class="li">002</li>
+        <li class="li">003</li>
+        <li class="li">004</li>
+        <li class="li">005</li>
+        <li class="li">006</li>
+    </ul>
+    <a>hello world!</a>
+    <a href="hello owrld">hello</a>
+    <a href="hello world" name="hello">world</a>
+    <script>
+        const type = (item) => Reflect.toString.call(item).replace(/\[|\]/g, '').split(' ')[1];
+        const ulHTMLCollection = document.getElementsByTagName('ul');
+        // HTMLCollection
+        console.log('type:ulHTMLCollection', type(ulHTMLCollection));
+        const liHTMLCollection = document.getElementsByClassName('li');
+        const ulElement = ulHTMLCollection.item(0);
+        // nodeType, nodeName, nodeValue
+        console.log('ulElement.nodeType:', ulElement.nodeType, 'ulElement.nodeName:', ulElement.nodeName, 'ulElement.nodeValue:', ulElement.nodeValue);
+        // childNodes nodeList
+        console.log('ulElement.childNodes:', ulElement.childNodes);
+        console.log('type:ulElement.childNodes:', type(ulElement.childNodes));
+        const parentNode = ulElement.parentNode;
+        const nextSibling = ulElement.nextSibling;
+        const previousSibling = ulElement.previousSibling;
+        const firstChild = ulElement.firstChild;
+        const lastChild = ulElement.lastChild;
+        const ownerDocument = ulElement.ownerDocument;
+        // parentNode nextSibling previousSibling firstChild lastChild ownerDocument
+        console.log('parentNode:', parentNode, 'nextSibling:', nextSibling, 'previousSibling:', previousSibling, 'firstChild:', firstChild, 'lastChild:', lastChild, 'ownerDocument:', ownerDocument);
+        // 新增 childElementCount, firstElementChild, lastElementChild, previousElementSibling, nextElementSibling
+        console.log(ulElement.childElementCount, ulElement.firstElementChild, ulElement.lastElementChild, liHTMLCollection.item(4).previousElementSibling, liHTMLCollection.item(4).nextElementSibling);
+        // appendChild insertBefore replaceChild removeChild
+        // append last
+        const appendNode = document.createElement('li');
+        appendNode.className = 'li append';
+        appendNode.innerText = 'appendChild';
+        ulElement.appendChild(appendNode); 
+        // ulElement.appendChild(appendNode) => ulElement.insertBefore(appendNode, null);
+        // insert first
+        const insertNode = document.createElement('li');
+        insertNode.className = 'li insert';
+        insertNode.innerText = 'insertBefore';
+        ulElement.insertBefore(insertNode, ulElement.firstChild);
+        // replace one
+        const replaceNode = document.createElement('li');
+        replaceNode.className = 'li replace';
+        replaceNode.innerText = 'replaceChild';
+        ulElement.replaceChild(replaceNode, liHTMLCollection.item(2));
+        // 同时做replace的过程你可以发现 HTMLCollection是动态变化的
+        // remove one
+        ulElement.removeChild(liHTMLCollection.item(5));
+        // 5被移除了
+        // cloneNode
+        const clonedUlElement = ulElement.cloneNode();
+        const deepClonedUlElement = ulElement.cloneNode(true);
+        document.body.appendChild(clonedUlElement);
+        document.body.appendChild(deepClonedUlElement);
+        // normalize
+        const demoNode = document.createElement('div');
+        demoNode.className = 'demo';
+        document.body.appendChild(demoNode);
+        const textNode = document.createTextNode('hello world!');
+        const textNodeCloned = textNode.cloneNode();
+        demoNode.appendChild(textNode);
+        demoNode.appendChild(textNodeCloned);
+        // 看看有多少个节点
+        console.log('demoNode.childNodes.length:', demoNode.childNodes.length);
+        // normalize之后
+        demoNode.normalize();
+        console.log('normalize后:demoNode.childNodes.length:', demoNode.childNodes.length);
+        // 这个过程中将两个同胞节点合并了
+        console.log('deepClonedUlElement.childNodes.length:', deepClonedUlElement.childNodes.length);
+        deepClonedUlElement.normalize();
+        console.log('normalize后:deepClonedUlElement.childNodes.length:',deepClonedUlElement.childNodes.length, deepClonedUlElement.childNodes);
+        // 该过程中将空文本节点删除了
+        // document元素
+        console.log('document.nodeType:', document.nodeType);
+        // document.doctype
+        console.log('document.doctype:', document.doctype);
+        // document.title
+        console.log('document.title:', document.title);
+        document.title = 'Hello world!';
+        // document.URL 当前页面完整url，domain：当前页面的域名，referrer：来源
+        console.log('document.URL:', document.URL, 'document.domain:', document.domain, 'document.referrer:', document.referrer);
+        // HTMLCollection.namedItem
+        console.log("liHTMLCollection.namedItem('001')", liHTMLCollection.namedItem('001'));
+        // 特殊集合
+        // 获取带name属性的a元素
+        console.log('获取带name属性的a元素：', document.anchors);
+        // 所有带href的a元素
+        console.log('所有带href的a元素：', document.links);
+        // document.forms, document.images
+        // document.write
+        // 元素书写方向
+        liHTMLCollection.namedItem('001').dir = 'rtl';
+        // TextNode
+        console.log('textNode的方法');
+        textNode.appendData('123');
+        console.log(textNode.nodeValue);
+        textNode.deleteData(1, 2);
+        console.log(textNode.nodeValue);
+        textNode.insertData(1, 'el');
+        console.log(textNode.nodeValue);
+        textNode.replaceData(1, 2, 'EL');
+        console.log(textNode.nodeValue);
+        console.log(textNode.substringData(1, 2));
+        textNode.splitText(1);
+        console.log(textNode.nodeValue);
+        demoNode.normalize();
+        console.log(textNode.nodeValue);
+        // Comment
+        console.log('注释:')
+        const comment = document.createComment('hello 这是注释');
+        document.body.append(comment);
+        console.log(comment, comment.nodeType, comment.nodeName);
+        // doctype
+        console.log('doctype：')
+        console.log(document.doctype.nodeType);
+        // fragment
+        console.log('fragment:');
+        const fragment = document.createDocumentFragment();
+        const arr = Array.from(liHTMLCollection);
+        arr.forEach((li, i) => {
+            let newLi = li.cloneNode(true); 
+            fragment.appendChild(newLi);
+        });
+        ulElement.appendChild(fragment);
+        function evalScript(code) {
+            const script = document.createElement('script');
+            const header = document.querySelector('head');
+            try {
+                script.appendChild(document.createTextNode(code));
+            } catch {
+                script.text = code;
+            }
+            const promise = new Promise((resolve, reject) => {
+                script.onload = () => {
+                    console.log('onload')
+                    resolve();
+                };
+                script.onerror = reject;
+            });
+            header.appendChild(script);
+            return promise;
+        }
+        evalScript('console.log("hello world!")').then(() => {
+            console.log('loaded');
+        })
+        function addCssRule(code) {
+            const style = document.createElement('style');
+            const header = document.querySelector('head');
+            style.type = 'text/css';
+            try {
+                style.appendChild(document.createTextNode(code));
+            } catch {
+                style.styleSheet.cssText = code;
+            }
+            header.appendChild(style);
+            return new Promise((resolve, reject) => {
+                style.onload = resolve;
+                style.onerror = reject;
+            });
+        }
+        addCssRule('body{background:#fee}').then(() => {
+            console.log('wo');
+        });
+        // classList
+        ulElement.classList.add('back');
+        console.log(ulElement.classList.contains('back'));
+        ulElement.classList.remove('back');
+        console.log(ulElement.classList.contains('back'));
+        ulElement.classList.toggle('back');
+        console.log(ulElement.classList.contains('back'));
+        // 焦点管理
+        console.log(document.activeElement, document.hasFocus());
+        const button = document.createElement('button');
+        button.appendChild(document.createTextNode('按钮'));
+        document.body.insertBefore(button, deepClonedUlElement);
+        button.focus();
+        button.onclick = () => {
+            button.scrollIntoView(true, { // 置顶 true 置底 false
+                behavior: 'smooth', // smooth auto 滚动动画
+                block: 'start', // start, center, end, nearest 垂直
+                inline: 'nearest', // start, center, end, nearest 水平
+            })
+        }
+        console.log(document.activeElement);
+        // readyState
+        console.log(document.readyState);
+        window.onload = () => {
+            console.log(document.readyState);
+        };
+    </script>
+</body>
+</html>

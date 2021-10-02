@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+    <script>
+        // 挂一个canvas上去
+        const drawing = document.querySelector('#canvas');
+        const context = drawing.getContext('2d');
+        context.strokeColor = 'red'; // 描边色
+        context.fillStyle = '#0000ff'; // 填充色
+        
+        // 设置描边
+        context.lineWidth = 1;
+
+        // lineCap 控制线条端点的形状 butt 平头 round 出圆头 square 出方头
+
+        context.lineCap = 'butt'; 
+        context.strokeRect(200, 10, 50, 50);
+        context.lineCap = 'round';
+        context.strokeRect(300, 10, 50, 50);
+        context.lineCap = 'square';
+        context.strokeRect(400, 10, 50, 50);
+
+        // lineJoin 控制线条交点形状，round圆转 bevel 取平 miter 出尖
+        context.lineJoin = 'round';
+        context.strokeRect(200, 100, 50, 50);
+        context.lineJoin = 'bevel';
+        context.strokeRect(300, 100, 50, 50);
+        context.lineJoin = 'miter';
+        context.strokeRect(400, 100, 50, 50);
+
+        
+        // 画矩形
+        context.fillRect(10, 10, 100, 100);
+        context.strokeRect(60, 60, 100, 100);
+        context.clearRect(60, 60, 50, 50);
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        
+    </div>
+    <script>
+        // 挂一个canvas上去
+        class Draw {
+            constructor({
+                el,
+                width,
+                height,
+            } = {}) {
+                this.el = el;
+                this.width = width;
+                this.height = height;
+                this.oCanvas;
+                this.context;
+                this.__init();
+            }
+            __init() {
+                const oCanvas = document.createElement('canvas');
+                oCanvas.width = this.width;
+                oCanvas.height = this.height;
+                oCanvas.style.border = '1px solid #000000';
+                this.context = oCanvas.getContext('2d');
+                this.oCanvas = oCanvas;
+                this.$mount(this.el);
+            }
+            $mount(el) {
+                this.el = el;
+                if (this.el) {
+                    const childNodes = this.el.childNodes;
+                    for (let l = childNodes.length, i = l - 1; i >= 0; i--) {
+                        this.el.removeChild(childNodes[i]);
+                    }
+                    this.el.appendChild(this.oCanvas);
+                }
+                return this;
+            }
+            line({
+                color,
+                backgroundColor,
+                x1,
+                y1,
+                x2,
+                y2,
+            } = {}) {
+                const { context } = this;
+                context.beginPath();
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+                context.strokeStyle = color;
+                context.stroke();
+                context.closePath();
+                return this;
+            }
+            circle({
+                color,
+                x,
+                y,
+                r,
+                startAngle = 0,
+                endAngle = 2 * Math.PI,
+                counterclockwise = false,
+            } = {}) {
+                const { context } = this;
+                context.beginPath();
+                context.arc(x, y, r, startAngle, endAngle, counterclockwise);
+                context.strokeStyle = color;
+                context.stroke();
+                context.closePath();
+                return this;
+            }
+            arcTo({
+                color,
+                backgroundColor,
+                x1,
+                y1,
+                x2,
+                y2,
+                r,
+            } = {}) {
+                const { context } = this;
+                context.beginPath();
+                context.moveTo(x1, y1);
+                context.arc(x1, y1, x2, y2, r);
+                context.strokeStyle = color;
+                context.stroke();
+                context.closePath();
+                return this;
+            }
+        }
+        const draw = new Draw({
+            width: 500,
+            height: 500,
+        }).$mount(document.querySelector('#app'));
+        draw
+            .line({
+                color: 'rgba(0, 0, 255, 0.5)',
+                x1: 10,
+                y1: 10,
+                x2: 30,
+                y2: 30,
+            }).line({
+                color: 'rgba(0, 255, 0, 0.5)',
+                x1: 20,
+                y1: 20,
+                x2: 30,
+                y2: 10,
+            }).circle({
+                color: 'rgba(255, 0, 0, 0.5)',
+                x: 100,
+                y: 100,
+                r: 50,
+                startAngle: 0.5 * Math.PI,
+                endAngle: 1.2 * Math.PI,
+                counterclockwise: true,
+            }).arcTo({
+                x1: 200,
+                y1: 10,
+                x2: 220,
+                y2: 40,
+                r: 50,
+            })
+
+    </script>
+</body>
+</html>

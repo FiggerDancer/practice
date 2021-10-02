@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 全局注册
+        let s0 = Symbol.for('foo');
+        let s1 = Symbol('foo');
+        let s2 = Symbol('bar');
+        console.log(s0 === s1, s0 === Symbol.for('foo')); // false true
+
+        // Symbol.keyFor
+        console.log(Symbol.keyFor(s0), Symbol.keyFor(s1)); // foo undefined
+
+        // 使用符号作为属性
+        let s3 = Symbol('baz');
+        let s4 = Symbol('qux');
+
+        let o = {
+            [s1]: 'foo val',
+        };
+
+        Object.defineProperty(o, s2, { value: 'bar val'});
+        Object.defineProperties(o, {
+            [s3]: { value: 'baz value'},
+            [s4]: { value: 'qux value' },
+            baz: { value: 'baz value'},
+            qux: { value: 'qux value'},
+        });
+
+        console.log('o:', o);
+        console.log(Object.getOwnPropertyNames(o));
+        console.log(Object.getOwnPropertySymbols(o));
+        console.log(Object.getOwnPropertyDescriptors(o));
+        console.log(Reflect.ownKeys(o))
+
+        // Symbol.asyncIterator
+        // 内部使用生成器实现
+        class Emitter {
+            constructor(max) {
+                this.max = max;
+                this.asyncIdx = 0;
+            }
+            async *[Symbol.asyncIterator]() {
+                while (this.asyncIdx < this.max) {
+                    yield new Promise((resolve) => resolve(this.asyncIdx++));
+                }
+            }
+        }
+        async function asyncCount() {
+            let emitter = new Emitter(5);
+            for await(const x of emitter) {
+                console.log(x);
+            }
+            emitter = null;
+        }
+        asyncCount();
+
+        // Symbol.isConcatSpreadable
+        let initial = ['foo'];
+        let array = ['bar'];
+        console.log(initial.concat(array)); // ['foo', 'bar']
+        array[Symbol.isConcatSpreadable] = false;
+        console.log(initial.concat(array)); // ['foo', Array(1)]
+    </script>
+</body>
+</html>

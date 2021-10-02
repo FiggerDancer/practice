@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function simpleTag(strings, ...expressions) {
+            console.log(strings);
+            return strings[0] + expressions.map((e, i) => `${e}${strings[i + 1]}`).join('');
+        }
+        const a = 1;
+        const b = 10;
+        const c = 13;
+        console.log(simpleTag`hello ${a} + ${b} + ${c} = ${a + b + c}`);
+        // 输出
+        // ["hello ", " + ", " + ", " = ", "", raw: Array(5)]
+        // 模板字面量标签函数.html:18 hello 1 + 10 + 13 = 24
+    </script>
+</body>
+</html>

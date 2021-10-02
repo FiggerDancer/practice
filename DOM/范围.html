@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <p>Hello world! I want to go to school by bus, But I have a headache. So I go to this by bike.</p>
+        <p>Hello world! I want to go to school by bus, But I have a headache. So I go to this by bike.</p>
+        <p>Hello world! I want to go to school by bus, But I have a headache. So I go to this by bike.</p>
+        <p>Hello world! I want to go to school by bus, But I have a headache. So I go to this by bike.</p>
+    </div>
+    <script>
+        const range1 = document.createRange();
+        const range2 = document.createRange();
+        const oApp = document.querySelector('#app');
+        const oP = document.querySelectorAll('p');
+        const firstP = oP.item(0);
+        // range1.selectNode(firstP);
+        // => 
+        const index = [...oApp.childNodes].indexOf(firstP);
+        range1.setStart(firstP.parentNode, index);
+        range1.setEnd(firstP.parentNode, index + 1);
+        // range2.selectNodeContents(firstP);
+        // =>
+        range2.setStart(firstP, 0);
+        range2.setEnd(firstP, firstP.childNodes.length);
+        console.log(range1);
+        console.log(range2);
+        // 操作范围
+        // 范围比较
+        console.log('比较;', range1.compareBoundaryPoints(Range.START_TO_END, range2));
+        // deleteContents
+        const thirdP = oP.item(2);
+        const range3 = document.createRange();
+        range3.setStart(thirdP.firstChild, 2);
+        range3.setEnd(thirdP.firstChild, 5);
+        range3.deleteContents();
+        // extractContents
+        const fragment2 = range1.cloneContents();
+        const fragment = range1.extractContents();
+        document.body.appendChild(fragment);
+        // cloneContents
+        range1.setStart(oApp, index);
+        range1.setEnd(oApp, index + 1);
+        document.body.appendChild(fragment2);
+        // 范围插入
+        const span = document.createElement('span');
+        span.appendChild(document.createTextNode('123456'));
+        range3.insertNode(span);
+        // 范围折叠
+        range2.collapse();
+        console.log('折叠:', range2.collapsed);
+        // 复制范围
+        let range4 = range2.cloneRange();
+        // 清理范围
+        range4.detach();
+        range4 = null;
+    </script>
+</body>
+</html>
