@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const isNative = (fn) => {
+            const reg = /native code/;
+            const string = fn.toString();
+            return reg.test(string);
+        }
+        
+        let timerFunc;
+        let pending = false;
+        let count = 0;
+        let isAsync = false;
+        const callbacks = [];
+        const flushCallback = () => {
+            pending = false;
+            for (let i = 0, l = callbacks.length; i < l; i++) {
+                const callback = callbacks[i];
+                callback();
+            }
+        }
+        let isIOS = false;
+        let _resolve;
+        if (typeof Promise !== 'undefined' && isNative(Promise)) {
+            const p = Promise.resolve();
+            timerFunc = () => {
+                p.then((resolve) => _resolve = resolve);
+                if (isIOS) {
+                    setTimeout(() => {});
+                }
+            }
+            isAsync = true;
+        } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
+            const observer = new MutationObserver(flushCallback);
+            const textNode = document.createTextNode(String(count));
+            observer.observe(textNode, { characterData: true });
+            timerFunc = () => {
+                text.count = (count = (++count % 2));
+            }
+            isAsync = true;
+        } else {
+            timerFunc = () => {
+                setTimeout(flushCallback);
+            }
+        }
+        function nextTick(cb, ctx) {
+            let _resolve;
+            const callback = () => {
+                if (cb) {
+                    try {
+                        cb.call(ctx);
+                    } catch {}
+                } else if (typeof Promise !== 'undefined') {
+                    _resolve();
+                }
+            }
+            if (!pending) {
+                pending = true;
+                timerFunc();
+            }
+            if (typeof Promise !== 'undefined') {
+                return new Promise((resolve) => {
+                    _resolve = resolve;
+                })
+            }
+        }
+    </script>
+</body>
+</html>

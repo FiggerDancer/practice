@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <div>{{name}}</div>
+    </div>
+   <script>
+        class Dep {
+            constructor() {
+                this.subs = [];
+            }
+            addSub(sub) {
+                this.subs.push(sub);
+            }
+            notify() {
+                const {subs} = this;
+                for (let i = 0, len = subs.length; i < len; i++) {
+                    subs[i].update();
+                }
+            }
+        }
+        class Watcher {
+            constructor(vm, exp, cb) {
+                this.vm = vm;
+                this.exp = exp;
+                this.cb = cb;
+                this.value = this.get();
+            }
+            get() {
+                Dep.target = this;
+                const value = this.vm._data[this.exp];
+                Dep.target = null;
+                return value;
+            }
+            update() {
+                const oldValue = this.value;
+                const value = this.vm._data[this.exp];
+                if (value !== oldValue) {
+                    this.value = value;
+                    this.cb.call(this.vm, value, oldValue);
+                }   
+            }
+        }
+        class Observer {
+            constructor(data) {
+                this.data = data;
+                this.walk();
+            }
+            walk() {
+                Object.keys(this.data).forEach((key) => {
+                    this.defineReactive(this.data, key);
+                });
+            }
+            defineReactive(data, key) {
+                const dep = new Dep();
+                let val = data[key];
+                const childObj = observe(val);
+                Object.defineProperty(data, key, {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        if (Dep.target) {
+                            dep.addSub(Dep.target)
+                        }
+                        return val;
+                    },
+                    set(newVal) {
+                        if (newVal === val) return;
+                        val = newVal;
+                        dep.notify();
+                    }
+                })
+            }
+        }
+        class Compile {
+            constructor(vm) {
+                this.vm = vm;
+                this.el = vm.$el;
+                this.fragment = null;
+                this.init();
+            }
+            init() {
+                if (this.el) {
+                    this.fragment = this.nodeToFragment(this.el);
+                    this.compileElement(this.fragment);
+                    this.el.appendChild(this.fragment);
+                }
+            }
+            nodeToFragment(el) {
+                const fragment = document.createDocumentFragment();
+                let child = el.firstChild;
+                while (child) {
+                    fragment.appendChild(child);
+                    child = el.firstChild;
+                }
+                return fragment;
+            }
+            compileElement(el) {
+                const childNodes = el.childNodes;
+                const self = this;
+                [].slice.call(childNodes).forEach((node) => {
+                    const reg = /{{(.*?)}}/;
+                    const text = node.textContent;
+                    if (self.isElementNode(node)) {
+                        self.compile(node);
+                    } else if (self.isTextNode(node) && reg.test(text)) {
+                        let name = reg.exec(text);
+                        self.compileText(node, name?.[1]);
+                    }
+                    if (node.childNodes && node.childNodes.length) {
+                        self.compileElement(node);
+                    }
+                })
+            }
+            compile(node) {
+                const nodeAttrs = node.attributes;
+                Array.prototype.forEach.call(nodeAttrs, attr => {
+                    const attrName = attr.name;
+                    if (this.isDirective(attrName)) {
+                        const exp = attr.value;
+                        const dir = attrName.substring(2);
+                        if (this.isEventDirective(attrName)) {
+                            this.compileEvent(node, this.vm, exp, dir);
+                        } else if (this.isVmodel(attrName)) {
+                            this.compileModel(node, this.vm, exp, dir);
+                        }
+                    }
+                })
+            }
+            compileText(node, exp) {
+                const self = this;
+                this.updateText(node, this.vm[exp]);
+                new Watcher(this.vm, exp, (value) => {
+                    console.log(value)
+                    self.updateText(node, value);
+                });
+            }
+            compileEvent(node, vm, exp, dir) {
+                const eventType = dir.split(':')[1];
+                const cb = vm.methods && vm.methods[exp];
+                if (eventType && cb) {
+                    node.addEventListener(eventType, cb.bind(vm), false);
+                }
+            }
+            compileModel(node, vm, exp, dir) {
+                const val = vm[exp];
+                const types = dir.split('.').slice(1);
+                this.updateModel(node, val);
+                new Watcher(this.vm, exp, val => {
+                    this.updateModel(node, val);
+                });
+                node.addEventListener('input', e => {
+                    const newVal = e.target.value;
+                    if (val === newVal) return;
+                    if (types.length) {
+                        if (types.indexOf('number') > -1) {
+                            newVal = Number(newVal);
+                        }
+                        if (types.indexOf('trim') > -1) {
+                            newVal = newVal.trim();
+                        }
+                    }
+                    this.vm[exp] = newVal;
+                    val = newVal;
+                }, false);
+            }
+            updateModel(node, val) {
+                node.value = typeof val === 'undefined' ? '' : val;
+            }
+            isTextNode(node) {
+                return node.nodeType === 3;
+            }
+            isElementNode(node) {
+                return node.nodeType === 1;
+            }
+            updateText(node, value) {
+                node.textContent = typeof value === 'undefined' ? '' : value;
+            }
+            isDirective(attr) {
+                return attr.indexOf('v-') === 0;
+            }
+            isEventDirective(str) {
+                return str.indexOf('on:') > -1;
+            }
+            isVmodel(str) {
+                return str.indexOf('model') > -1;
+            }
+        }
+        const observe = (data) => {
+            if (typeof data !== 'object') return;
+            return new Observer(data);
+        }
+        const initData = (vm) => {
+            const sharedPropertyDefinition = {
+                configurable: true,
+                enumerable: true,
+            };
+            // 透传代理
+            const proxy = (target, sourceKey, key) => {
+                sharedPropertyDefinition.get = function() {
+                    return target[sourceKey][key];
+                }
+                sharedPropertyDefinition.set = function(newVal) {
+                    target[sourceKey][key] = newVal;
+                }
+                Object.defineProperty(target, key, sharedPropertyDefinition);
+            }
+            Object.keys(vm._data).forEach((key) => {
+                proxy(vm, '_data', key);
+            });
+        }
+        function Vue(options) {
+            const vm = this;
+            this.options = options;
+            const {
+                el,
+                data,
+                methods,
+            } = options || {};
+            vm.$el = el;
+            vm._data = data();
+            initData(vm);
+            vm.methods = methods;
+            observe(vm._data);
+            new Compile(vm);
+        }
+        const test = new Vue({
+            el: document.querySelector('#app'),
+            data() {
+                return {
+                    name: 'hello world!',
+                    sex: 'nan'
+                }
+            }
+        });
+        setTimeout(() => {
+            test.name = '你好世界'
+        }, 3000);
+    </script> 
+</body>
+</html>

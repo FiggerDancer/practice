@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <div>{{name}}</div>
+    </div>
+    <script>
+        // 订阅器
+        class Dep {
+            constructor() {
+                this.subs = [];
+            }
+            addSub(sub) {
+                this.subs.push(sub);
+            }
+            notify() {
+                for (let i = 0, l = this.subs.length; i < l; i++) {
+                    this.subs[i].update();
+                }
+            }
+        }
+        // 监查器
+        class Watcher {
+            constructor(vm, exp, cb) {
+                this.vm = vm;
+                this.exp = exp;
+                this.cb = cb;
+                this.value = this.get();
+            }
+            get() {
+                Dep.target = this;
+                const value = this.vm[this.exp];
+                Dep.target = null;
+                return value;
+            }
+            update() {
+                const oldValue = this.value;
+                const newValue = this.vm[this.exp];
+                if (newValue !== oldValue) {
+                    this.cb.call(this.vm, newValue, oldValue);
+                    this.value = newValue;
+                }
+            }
+        }
+        // 观察
+        class Observer {
+            constructor(data) {
+                this.data = data;
+                this.walk();
+            }
+            walk() {
+                Object.keys(this.data).forEach((key) => {
+                    const childObj = this.data[key];
+                    observe(childObj);
+                    this.defineReactive(this.data, key);
+                })
+            }
+            defineReactive(data, key) {
+                const dep = new Dep();
+                let value = data[key];
+                Object.defineProperty(data, key, {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        if (Dep.target) {
+                            dep.addSub(Dep.target);
+                        }
+                        return value;
+                    },
+                    set(newValue) {
+                        if (newValue !== value) {
+                            dep.notify();
+                            value = newValue;
+                        }
+                    }
+                })
+            }
+        }
+        // 编译
+        class Compile {
+            constructor(vm) {
+                this.vm = vm;
+                this.el = vm.$el;
+                this.data = vm._data;
+                this.init();
+            }
+            init() {
+                if (this.el) {
+                    const fragment = this.nodeToFragment(this.el);
+                    this.compileElement(fragment);
+                    this.el.appendChild(fragment);
+                }
+            }
+            nodeToFragment(el) {
+                const fragment = document.createDocumentFragment();
+                const child = el.firstChild;
+                while (child) {
+                    fragment.append(el.firstChild);
+                    child = el.firstChild;
+                }
+                return fragment;
+            }
+            compileElement(fragment) {
+                const childNodes = [...fragment.childNodes];
+                const reg = /{{(.*)}}/;
+                for (let i = 0, l = childNodes.length; i < l; i++) {
+                    const childNode = childNodes[i];
+                    const text = childNode.textContent;
+                    if (isElementNode(childNode)) {
+                        this.compile(childNode);
+                    } else if (isTextNode(childNode) && reg.test(text)) {
+                        const name = reg.exec(text);
+                        this.compileText(childNode, name?.[1]);
+                    }
+                    if (childNode.childNodes?.length) {
+                        this.compileElement(childNode);
+                    }
+                }
+            }
+            compile(node) {
+                const nodeAttrs = node.attributes;
+                [...nodeAttrs].forEach((attr) => {
+                    const name = attr.name;
+                    if (isDirective(name)) {
+                        const exp = attr.value;
+                        const dir = name.substring(2);
+                        if (isEventDirective(dir)) {
+                            this.compileEvent(node, dir, exp);
+                        } else if (isVmodel(dir)) {
+                            this.compileModel(node, dir, exp);
+                        }
+                    }
+                });
+            }
+            compileTextNode(node, name) {
+                const self = this;
+                self.updateText(node, self.vm[name])
+                new Watcher(self.vm, name, (newValue) => {
+                    self.updateText(self.vm, newValue);
+                })
+            }
+            compileModel(node, dir, exp) {
+                const vm = self.vm;
+                let value = vm[exp];
+                const types = dir.split('.');
+                this.updateModel(node, newValue);
+                new Watcher(vm, exp, (value) => this.updateModel(node, value))
+                vm.addEventListener('input', (e) => {
+                    const newValue = e.target.value;
+                    if (newValue === value) return;
+                    if (types.length) {
+                        if (types.indexOf('number') > -1) {
+                            newVal = Number(newVal);
+                        }
+                        if (types.indexOf('trim') > -1) {
+                            newVal = newVal.trim();
+                        }
+                    }
+                    vm[exp] = newValue;
+                    value = newValue;
+                }, false)
+            }
+            compileEvent(node, dir, exp) {
+                const vm = self.vm;
+                const eventType = dir.split(':')[1];
+                const cb = vm.methods[exp];
+                if (eventType && typeof cb === 'function') {
+                    vm.addEventListener(eventType, cb.bind(vm), false);
+                }
+            }
+            updateModel() {
+                node.value = typeof newValue !== 'undefined' ? newValue : '';
+            }
+            updateText(node, newValue) {
+                node.textContent = typeof newValue !== 'undefined' ? newValue : '';
+            }
+            isElementNode(node) {
+                return node.nodeType === 1;
+            }
+            isTextNode(node) {
+                return node.nodeType === 3;
+            }
+            isDirective(attr) {
+                return ~attr.indexOf('v-');
+            }
+            isEventDirective(str) {
+                return ~str.indexOf('on');
+            }
+            isVmodel(str) {
+                return ~str.indexOf('model');
+            }
+        }
+        const observe = (data) => {
+            if (typeof data !== 'object') return;
+            return new Observe(data);
+        }
+
+        const initData = (vm) => {
+            const sharedPropertyDefinition = {
+                configurable: true,
+                enumerable: true,
+            };
+            // 映射
+            const proxy = (vm, sourceKey, key) => {
+                sharedPropertyDefinition.get = () => {
+                    return vm[sourceKey][key];
+                };
+                sharedPropertyDefinition.set = (newVal) => {
+                    vm[sourceKey][key] = newVal;
+                };
+                Object.defineProperty(vm, key, sharedPropertyDefinition);
+            }
+            Object.keys(vm._data).forEach((key) => {
+                proxy(vm, '_data', key);
+            });
+        }
+
+        function Vue(options) {
+            const vm = this;
+            vm._data = options.data;
+            vm.$el = options.el;
+            initData(vm);
+            vm.methods = options.methods;
+            observe(vm._data);
+            new Compile(vm);
+        }
+
+
+    </script>
+</body>
+</html>

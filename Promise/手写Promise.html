@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function resolvePromise(promise2, x, resolve, reject) {
+            if (promise2 === x) return new TypeError("循环引用");
+            if (x !== null && (typeof x === 'object' || typeof x === 'function')) {
+                let called;
+                try {
+                    let then = x.then;
+                    if (typeof then === 'function') {
+                        then.call(x, y => {
+                            if (called) return;
+                            called = true;
+                            resolvePromise(promise2, y, resolve, reject);
+                        }, r => {
+                            if (called) return;
+                            called = true;
+                            reject(r);
+                        });
+                    } else {
+                        resolve(x);
+                    }
+                } catch (e) {
+                    if (called) return;
+                    called = true;
+                    reject(e);
+                }
+            } else {
+                resolve(x);
+            }
+        }
+
+        class MyPromise {
+            constructor(executor) {
+                this.status = 'pending';
+                this.value = undefined;
+                this.reason = undefined;
+                this.onResolvedCallbacks = [];
+                this.onRejectedCallbacks = [];
+                let resolve = (data) => {
+                    if (this.status === 'pending') {
+                        this.value = data;
+                        this.status = 'resolved';
+                        this.onResolvedCallbacks.forEach(fn => fn());
+                    }
+                }
+                let reject = (reason) => {
+                    if (this.status === 'pending') {
+                        this.reason = reason;
+                        this.status = 'rejected';
+                        this.onRejectedCallbacks.forEach(fn => fn());
+                    }
+                }
+                try {
+                    executor(resolve, reject);
+                } catch(e) {
+                    reject(e);
+                }
+            }
+            then(onFulFilled, onRejected) {
+                onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : y => y;
+                onRejected = typeof onRejected === 'function' ? onRejected : err => { throw err; }
+                let promise2;
+                if (this.status === 'resolved') {
+                    promise2 = new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            try {
+                                let x = onFulFilled(this.value);
+                                resolvePromise(promise2, x, resolve, reject);
+                            } catch(e) {
+                                reject(e);
+                            }
+                        })
+                    })
+                }
+                if (this.status === 'rejected') {
+                    promise2 = new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            try {
+                                let x = onRejected(this.reason);
+                                resolvePromise(promise2, x, resolve, reject);
+                            } catch(e) {
+                                reject(e);
+                            }
+                        })
+                    })
+                }
+                if (this.status === 'pending') {
+                    promise2 = new Promise((resolve, reject) => {
+                        this.onResolvedCallbacks.push(() => {
+                            setTimeout(() => {
+                                try {
+                                    let x = onFulFilled(this.value);
+                                    resolvePromise(promise2, x, resolve, reject);
+                                } catch(e) {
+                                    reject(e);
+                                }
+                            })
+                        })
+                        this.onRejectedCallbacks.push(() => {
+                            setTimeout(() => {
+                                try {
+                                    let x = onRejected(this.reason);
+                                    resolvePromise(promise2, x, resolve, reject);
+                                } catch(e) {
+                                    reject(e);
+                                }
+                            })
+                        })
+                    })
+                }
+                return promise2;
+            }
+            catch(onRejected) {
+                return this.then(null, onRejected);
+            }
+        }
+
+        MyPromise.resolve = function(value) {
+            return new Promise((resolve, reject) => resolve(value));
+        }
+
+        MyPromise.reject = function(reason) {
+            return new Promise((resolve, reject) => reject(reason));
+        }
+
+        MyPromise.all = function(promises) {
+            return new Promise((resolve, reject) => {
+                let arr = [];
+                let i = 0;
+                function processData(index, data) {
+                    arr[index] = data;
+                    if (++i === promises.length) {
+                        resolve(arr);
+                    }
+                }
+                for (let j = 0, l = promises.length; j < l; j++) {
+                    promises[j].then((data) => {
+                        processData(j, data);
+                    }, reject)
+                }
+            })
+        }
+
+        MyPromise.race = function(promises) {
+            return new Promise((resolve, reject) => {
+                for (let i = 0; i < promises.length; i++) {
+                    promises[i].then(resolve, reject);
+                }
+            })
+        }
+
+        MyPromise.any = function(promises) {
+            return new Promise((resolve, reject) => {
+                let j = 0;
+                let arr = [];
+                function processData(index, reason) {
+                    arr[index] = reason;
+                    if (++j === promises.length) {
+                        reject(arr);
+                    }
+                }
+                for (let i = 0; i < promises.length; i++) {
+                    promises[i].then(resolve, function(reason) {
+                        processData(i, reason);
+                    });
+                }
+            })
+        }
+
+        MyPromise.allSettled = function(promises) {
+            return new Promise((resolve, reject) => {
+                let arr = [];
+                let i = 0;
+                function processData(index, value, status) {
+                    arr[index] = {
+                        status,
+                        value,
+                    }
+                    if (++i === promises.length) {
+                        resolve(arr);
+                    }
+                }
+                for (let j = 0, l = promises.length; j < l; j++) {
+                    promises[j].then((data) => {
+                        processData(j, data, 'fulfilled');
+                    }, (data) => {
+                        processData(j, data, 'rejected');
+                    })
+                }
+            })
+        }
+
+        const promise1 = new MyPromise((resolve, reject) => {
+            setTimeout(() => {
+                reject('promise1');
+            }, 5000)
+        });
+
+        const promise2 = new MyPromise((resolve, reject) => {
+            setTimeout(() => {
+                reject('promise2');
+            }, 3000)
+        });
+
+        const promise3 = new MyPromise((resolve, reject) => {
+            setTimeout(() => {
+                reject('promise3');
+            }, 1000)
+        });
+
+        MyPromise.all([promise1, promise2, promise3]).then((value) => {
+            console.log(value);
+        }).catch((reason) => {
+            console.error(reason);
+        })
+
+        MyPromise.race([promise1, promise2, promise3]).then((value) => {
+            console.log(value);
+        }).catch((reason) => {
+            console.error(reason);
+        })
+
+        MyPromise.any([promise1, promise2, promise3]).then((value) => {
+            console.log(value);
+        }).catch((reason) => {
+            console.error(reason);
+        })
+
+        MyPromise.allSettled([promise1, promise2, promise3]).then((value) => {
+            console.log(value);
+        }).catch((reason) => {
+            console.error(reason);
+        })
+
+        // 顺序执行
+        const composePromise = (...rest) => {
+            const promise = rest.reduce(function(pre, cur) {
+                return pre.then((data) => {
+                    return cur;
+                })
+            }, MyPromise.resolve());
+            return promise;
+        }
+
+        async function composePromiseV2(...rest) {
+            let root;
+            for (let i of rest) {
+                let data;
+                try {
+                    data = await i;
+                } catch(e) { 
+                    MyPromise.reject(e)
+                };
+                root = data;
+            }
+            return root;
+        }
+        
+        composePromiseV2(promise1, promise2, promise3).then((data) => {
+            console.log('promise4');
+        }).catch(e => {
+            console.log(e);
+        });
+
+        // 顺序执行函数
+        const add = (num) => ++num;
+
+        const compose = (...rest) => {
+            return rest.reduce(function(pre, cur) {
+                return cur(pre);
+            }, 1)
+        }
+
+        const a = compose(add, add, add);
+        console.log(a);
+    </script>
+</body>
+</html>
