@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function Parent() {
+            this.name = 'parent';
+            this.play = [1, 2, 3];
+        }
+        function Child() {
+            this.type = 'child';
+        }
+        Child.prototype = new Parent();
+        const s1 = new Child();
+        const s2 = new Child();
+        s1.play.push(4);
+        console.log(s1.play, s2.play);
+        // 改变s1的play属性，s2的play属性也会跟着变化，因为两者使用的是同一个原型对象
+    </script>
+</body>
+</html>

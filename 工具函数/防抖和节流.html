@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button>hello</button>
+    <script>
+        // 节流，只执行第一次，然后一段时间禁止直行
+        const throttle = (handler, delay = 200) => {
+            let timer = null;
+            return function(...rest) {
+                if (timer) return;
+                handler.apply(this, rest);
+                timer = setTimeout(() => {
+                    timer = null;
+                }, delay);
+            }
+        }
+        // 防抖，只执行最后一次
+        const debounce = (handler, delay = 200) => {
+            let timer = null;
+            return function(...rest) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    handler.apply(this, rest);
+                    timer = null;
+                }, delay);
+            }
+        }
+    </script>
+    <script>
+        const fn = debounce((e) => {console.log('hello world' + e)}, 10000);
+        document.querySelector('button').onclick = fn;
+    </script>
+</body>
+</html>

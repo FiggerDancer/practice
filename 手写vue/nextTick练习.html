@@ -8,71 +8,65 @@
 </head>
 <body>
     <script>
-        const isNative = (fn) => {
-            const reg = /native code/
-            return (reg.test(fn.toString()));
-        }
-
-        let timerFunc;
+        // nextTick
+        let  pending = false;
         const callbacks = [];
-        let pending = false;
+        let timerFunc;
         let isIOS = false;
+        const noop = () => {};
 
         const flushCallbacks = () => {
             pending = false;
-            const copy = [...callbacks];
+            const copies = callbacks.slice();
             callbacks.length = 0;
-            for (let i = 0, l = copy.length; i < l; i++) {
-                try {
-                    copy[i]();
-                } catch {
-
-                }
+            for (let i = 0, l = copies.length; i < l; i++) {
+                copies[i]();
             }
         }
-        let resolve;
+
+        const isNative = (fn) => /native code/.test(fn.toString());
+
         if (typeof Promise !== 'undefined' && isNative(Promise)) {
             const p = Promise.resolve();
             timerFunc = () => {
                 p.then(flushCallbacks);
                 if (isIOS) {
-                    setTimeout(() => {})
+                    setTimeout(noop);
                 }
             }
         } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
             let count = 0;
             const observer = new MutationObserver(flushCallbacks);
             const textNode = document.createTextNode(String(count));
-            observer.observe(textNode, {characterData: true});
+            observer.observe(textNode, { characterData: true });
             timerFunc = () => {
-                textNode.textContent = (count = ++count % 2)
+                textNode.textContent = (count = ++count % 2);
             }
         } else {
-            timerFunc = () => {
-                setTimeout(flushCallbacks);
-            }
+            setTimeout(flushCallbacks, 0);
         }
-
-        const nextTick = (cb, ctx) => {
+        
+        function nextTick(cb, ctx) {
             let _resolve;
             callbacks.push(() => {
                 if (cb) {
-                    cb.call(ctx);
+                    try {
+                        cb.call(ctx);
+                    } catch(e) {
+
+                    }
                 } else if (_resolve) {
                     _resolve();
                 }
-            })
+            });
             if (!pending) {
                 pending = true;
                 timerFunc();
             }
-            if (typeof Promise !== 'undefined') {
-                return new Promise((resolve, reject) => {
-                    _resolve = resolve;
-                })
+            if (typeof Promise !== 'undefined' && typeof Promise.then === 'function') {
+                return new Promise(resolve => _resolve = resolve);
             }
         }
-
     </script>
 </body>
 </html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        Object.create2 = function(proto, propertyObject = undefined) {
+            if (typeof proto !== 'object' && typeof proto !== 'function') {
+                throw new TypeError();
+            }
+            if (propertyObject === null) {
+                throw new TypeError();
+            }
+            function F() {}
+            F.prototype = proto;
+            const obj = new F();
+            if (propertyObject !== undefined) {
+                Object.defineProperties(obj, propertyObject);
+            }
+            if (proto === null) {
+                obj.__proto__ = null;
+            }
+            return obj;
+        }
+    </script>
+</body>
+</html>

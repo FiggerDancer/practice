@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 实例.__proto__ === 原型
+        // 原型.constructor === 构造函数
+        // 构造函数.prototype === 原型
+
+        // 这条线其实是是基于原型进行获取的，可以理解成一条基于原型的映射线。例如: 
+        const o = new Object()
+        console.log(o) //{}
+
+        // 注意: 其实实例上并不是真正有 constructor 这个指针，它其实是从原型链上获取的
+        console.log(o.hasOwnProperty('constructor'))  //false 
+        console.log(o.constructor)                       //[Function: Object]
+        console.log(o.constructor === Object)            // --> true
+        console.log(o.__proto__.constructor === Object)  // --> true
+        console.log(o.__proto__.constructor.prototype.constructor === Object)  // --> true
+
+        o.__proto__ = null
+        console.log(o)                         //[Object: null prototype] {}
+        console.log(o.constructor === Object)  // --> false
+
+
+        class A {}
+        class B extends A {}
+        class C extends B {}
+        console.dir(C);
+        console.dir(new C());
+    </script>
+</body>
+</html>

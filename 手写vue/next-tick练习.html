@@ -8,71 +8,60 @@
 </head>
 <body>
     <script>
-        const isNative = (fn) => {
+        function isNative(fn) {
             const reg = /native code/
-            return (reg.test(fn.toString()));
+            return reg.test(fn.toString());
         }
-
-        let timerFunc;
         const callbacks = [];
         let pending = false;
+        let timerFunc;
         let isIOS = false;
-
-        const flushCallbacks = () => {
+        function flushCallbacks() {
             pending = false;
-            const copy = [...callbacks];
-            callbacks.length = 0;
-            for (let i = 0, l = copy.length; i < l; i++) {
-                try {
-                    copy[i]();
-                } catch {
-
-                }
+            const copies = callbacks.slice();
+            for (let i = 0, l = copies.length; i < l; i++) {
+                copies[i]();
             }
         }
-        let resolve;
         if (typeof Promise !== 'undefined' && isNative(Promise)) {
             const p = Promise.resolve();
             timerFunc = () => {
                 p.then(flushCallbacks);
                 if (isIOS) {
-                    setTimeout(() => {})
+                    setTimeout(() => {});
                 }
-            }
+            };
         } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
             let count = 0;
-            const observer = new MutationObserver(flushCallbacks);
             const textNode = document.createTextNode(String(count));
-            observer.observe(textNode, {characterData: true});
+            const observer = new MutationObserver(flushCallbacks);
+            observer.observe(textNode, { characterData: true });
             timerFunc = () => {
-                textNode.textContent = (count = ++count % 2)
+                textNode.textContent = (count = ++count % 2);
             }
         } else {
-            timerFunc = () => {
-                setTimeout(flushCallbacks);
-            }
+            timerFunc = () => setTimeout(flushCallbacks);
         }
-
-        const nextTick = (cb, ctx) => {
+        function nextTick(cb, ctx) {
             let _resolve;
             callbacks.push(() => {
                 if (cb) {
-                    cb.call(ctx);
+                    try {
+                        cb.call(ctx);
+                    } catch(e) {
+                        console.error('错误了');
+                    }
                 } else if (_resolve) {
                     _resolve();
                 }
-            })
+            });
             if (!pending) {
                 pending = true;
-                timerFunc();
+                flushCallbacks();
             }
-            if (typeof Promise !== 'undefined') {
-                return new Promise((resolve, reject) => {
-                    _resolve = resolve;
-                })
-            }
+            if (typeof Promise === 'undefined' || typeof Promise.then !== 'function') return;
+            return new Promise((resolve) => _resolve = resolve);
         }
-
     </script>
 </body>
 </html>

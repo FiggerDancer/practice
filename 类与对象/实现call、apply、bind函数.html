@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // bind
+        Function.prototype.bind = function(context, ...args) {
+            const self = this;
+            const fBound = function() {
+                self.apply(this instanceof self ? this : context, args.concat(Array.prototype.slice.call(arguments)));
+            }
+            fBound.prototype = Object.create(this.prototype);
+            return fBound;
+        }
+        // call
+        Function.prototype.call = function(obj, ...args) {
+            let context = obj;
+            let fn = Symbol('fn');
+            context[fn] = this;
+            let result = context[fn](...args);
+            delete context[fn];
+            return result;
+        }
+        let obj = { name: "obj" };
+        function func(x, y) {
+            console.log(this.name)
+            return x + y
+        }
+        console.log(func.call(obj, 10, 20))
+        // apply
+        Function.prototype.apply = function(obj, args) {
+            let context = obj;
+            const fn = Symbol('fn');
+            context[fn] = this;
+            const result = context[fn](...args);
+            delete context[fn];
+            return result;
+        }
+    </script>
+</body>
+</html>

@@ -68,8 +68,8 @@
                 onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : y => y;
                 onRejected = typeof onRejected === 'function' ? onRejected : err => { throw err; }
                 let promise2;
-                if (this.status === 'resolved') {
-                    promise2 = new Promise((resolve, reject) => {
+                if (this.status === 'fulfilled') {
+                    promise2 = new MyPromise((resolve, reject) => {
                         setTimeout(() => {
                             try {
                                 let x = onFulFilled(this.value);
@@ -81,7 +81,7 @@
                     })
                 }
                 if (this.status === 'rejected') {
-                    promise2 = new Promise((resolve, reject) => {
+                    promise2 = new MyPromise((resolve, reject) => {
                         setTimeout(() => {
                             try {
                                 let x = onRejected(this.reason);
@@ -93,7 +93,7 @@
                     })
                 }
                 if (this.status === 'pending') {
-                    promise2 = new Promise((resolve, reject) => {
+                    promise2 = new MyPromise((resolve, reject) => {
                         this.onResolvedCallbacks.push(() => {
                             setTimeout(() => {
                                 try {
@@ -198,6 +198,17 @@
             })
         }
 
+        // 可以中断的Promise,竞速中断法
+        function abortPromise(p1) {
+            let abort;
+            const p2 = new MyPromise((resolve, reject) => {
+                abort = reject;
+            });
+            const promise = MyPromise.race([p1, p2]);
+            promise.abort = abort;
+            return promise;
+        }
+
         const promise1 = new MyPromise((resolve, reject) => {
             setTimeout(() => {
                 reject('promise1');
@@ -239,6 +250,8 @@
         }).catch((reason) => {
             console.error(reason);
         })
+
+        
 
         // 顺序执行
         const composePromise = (...rest) => {

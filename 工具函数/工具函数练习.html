@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function throttle(fn, delay) {
+            let timer;
+            return function(...rest) {
+                if (timer) {
+                    return;
+                }
+                fn.apply(this, rest);
+                timer = setTimeout(() => {
+                    timer = null;
+                }, delay)
+            }
+        }
+        function debounce(fn, delay) {
+            let timer;
+            return function(...rest) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    fn.apply(this, rest);
+                }, delay)
+            }
+        }
+        function memorized(fn, hashFn) {
+            const cache = {};
+            const memorize = function(...rest) {
+                const key = typeof hashFn === 'function' ? hashFn(rest) : rest[0];
+                return (cache[key] = cache[key] || fn.apply(this, rest));
+            }
+            memorize.cache = cache;
+            return memorize;
+        }
+        function shuffle(arr) {
+            let len = arr.length;
+            while (len) {
+                const random = Math.floor(Math.random() * len--);
+                [arr[random], arr[len - 1]] = [arr[len - 1], arr[random]];
+            }
+            return arr;
+        }
+        // 深拷贝练习
+        const isObject = (target) => typeof target === 'object' || typeof target === 'function' && target !== null;
+
+        const getType = (target) => Reflect.toString.call(target);
+
+        const canTraverse = {
+            '[object Map]': true,
+            '[object Arguments]': true,
+            '[object Set]': true,
+            '[object Array]': true,
+            '[object Object]': true,
+        };
+
+        const handleRegExp = (target) => {
+            const {source, flags} = target;
+            return new RegExp(source, flags);
+        }
+
+        const handleFn = (target) => {
+            const fnStr = Function.prototype.toString.call(target);
+            const bodyReg = /(?<={)(.|\n)+(?=})/m;
+            const paramReg = /(?<=\().+(?=\)\s*{)/;
+            const params = paramReg.exec(fnStr);
+            const body = bodyReg.exec(fnStr);
+            if (!body) return null
+            if (params) {
+                const paramArr = params[0].split(',');
+                return new Function(...paramArr, body[0]);
+            }
+            return new Function(body[0]);
+        }
+
+        const notTraverseHandle = (target, type) => {
+            const Ctor = target.constructor;
+            switch(type) {
+                case '[object Boolean]': 
+                    return new Object(Boolean.prototype.valueOf.call(target));
+                case '[object Number]': 
+                    return new Object(Number.prototype.valueOf.call(target));
+                case '[object String]': 
+                    return new Object(String.prototype.valueOf.call(target));
+                case '[object Symbol]':
+                    return new Object(Symbol.prototype.valueOf.call(target));
+                case '[object Error]':
+                case '[object Date]':
+                    return new Ctor(target);
+                case '[object RegExp]':
+                    return handleRegExp(target);
+                case '[object Function]':
+                    return handleFn(target);
+                default:
+                    return new Ctor(target); 
+            }
+        }
+
+        function deepClone(target, map = new WeakMap()) {
+            if (!isObject(target)) {
+                return target;
+            }
+            const type = getType(target);
+            if (!canTraverse[type]) {
+                return notTraverseHandle(target, type);
+            }
+            let cloneTarget;
+            if (cloneTarget = map.get(target)) {
+                return cloneTarget; 
+            }
+            if (type === '[object Map]') {
+                cloneTarget = new Map();
+                target.forEach((item, key) => {
+                    cloneTarget.set(deepClone(key, map), deepClone(item, map));
+                });
+            }
+            else if (type === '[object Set]') {
+                cloneTarget = new Set();
+                target.forEach((item) => {
+                    cloneTarget.add(deepClone(item, map));
+                });
+            }
+            else {
+                cloneTarget = {};
+                for (let key in target) {
+                    if (Reflect.prototype.hasOwnProperty.call(target, key)) {
+                        cloneTarget[key] = deepClone(target[key], map);
+                    }
+                }
+            }
+            return cloneTarget;
+        }
+    </script>
+</body>
+</html>

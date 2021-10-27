@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function Parent() {
+            this.name = 'parent';
+            this.play = [1, 2, 3];
+        }
+        Parent.prototype.say = function() {
+            console.log('Hello World!');
+        }
+        function Child() {
+            Parent.call(this);
+            this.name = 'child';
+        }
+        
+        // 直接这样写原型链不完整
+        // Child.prototype = Parent.prototype;
+        // Child.prototype.constructor = Child;
+
+        function F() {}
+        F.prototype = Parent.prototype;
+        let f = new F();
+        f.constructor = Child;
+        Child.prototype = f;
+
+        const child = new Child();
+        child.say();
+        console.log(child, child.__proto__);
+        console.log(child.constructor, child.__proto__.constructor);
+        console.log(Reflect.getPrototypeOf(child));
+        console.log(Object.getPrototypeOf(child.__proto__));
+
+        // 封装
+        // const inherit = (() => {
+        //     const F = function() {};
+        //     return function (c, p) {
+        //         F.prototype = p.prototype;
+        //         c.prototype = new F();
+        //         c.uber = p.prototype;
+        //         c.prototype.constructor = c;
+        //     }
+        // })();
+
+        function inherit(c, p) {
+            c.prototype = Object.create(p.prototype);
+            c.prototype.constructor = c;
+        }
+        function A () {
+            this.name = 'A';
+        }
+        A.prototype.say = () => {
+            console.log("asdfas")
+        }
+        function B() {
+            A.call(this);
+            this.name = 'B';
+        }
+        inherit(B, A);
+        const b = new B();
+        console.log(b);
+        b.say();
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <div>{{name}}</div>
+    </div>
+    <script>
+        class Dep {
+            constructor() {
+                this.subs = [];
+            }
+            addSub(sub) {
+                this.subs.push(sub);
+            }
+            notify() {
+                const subs = this.subs;
+                for (let i = 0, l = subs.length; i < l; i++) {
+                    subs[i].update();
+                }
+            }
+        }
+        class Watcher {
+            constructor(vm, exp, cb) {
+                this.vm = vm;
+                this.exp = exp;
+                this.cb = cb;
+                this.value = this.get();
+            }
+            get() {
+                Dep.target = this;
+                const value = this.vm[this.exp];
+                Dep.target = null;
+                return value;
+            }
+            update() {
+                const oldValue = this.value;
+                console.log(this.exp);
+                const newValue = this.vm[this.exp];
+                console.log(this.vm[this.exp]);
+                if (oldValue !== newValue) {
+                    this.cb.call(this.vm, newValue, oldValue);
+                }
+            }
+        }
+        const observe = (data) => {
+            if (typeof data !== 'object') return;
+            return new Observer(data);
+        }
+        class Observer {
+            constructor(data) {
+                this.data = data;
+                this.walk();
+            }
+            walk() {
+                Object.keys(this.data).forEach((key) => {
+                    this.defineReactive(this.data, key);
+                })
+            }
+            defineReactive(data, key) {
+                const dep = new Dep();
+                let value = data[key];
+                observe(value);
+                Object.defineProperty(data, key, {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        if (Dep.target) {
+                            dep.addSub(Dep.target);
+                        }
+                        return value; 
+                    },
+                    set(val) {
+                        if (value !== val) {
+                            value = val;
+                            dep.notify();
+                        }
+                    }
+                })
+            }
+        }
+        class Compile {
+            constructor(vm) {
+                this.vm = vm;
+                this.el = vm.$el;
+                this.init();
+            }
+            init() {
+               this.fragment = this.nodeToFragment(this.el);
+               this.compileElement(this.fragment);
+               this.el.appendChild(this.fragment);
+            }
+            nodeToFragment(el) {
+                const fragment = document.createDocumentFragment();
+                while (el.firstChild) {
+                    fragment.appendChild(el.firstChild);
+                }
+                return fragment;
+            }
+            compileElement(fragment) {
+                const childNodes = fragment.childNodes;
+                [...childNodes].forEach((childNode) => {
+                    const text = childNode.textContent;
+                    const reg = /{{(.*)}}/;
+                    if (this.isElementNode(childNode)) {
+                        this.compile(childNode);
+                    } else if (this.isTextNode(childNode) && reg.test(text)) {
+                        const name = reg.exec(text);
+                        this.compileText(childNode, name?.[1]);
+                    } 
+                    const _childNodes = childNode.childNodes;
+                    if (!_childNodes.length) return;
+                    this.compileElement(childNode);
+                })
+            }
+            isElementNode(node) {
+                return node.nodeType === 1;
+            }
+            isTextNode(node) {
+                return node.nodeType === 3;
+            }
+            compile() {
+
+            }
+            compileText(node, name) {
+                console.log(name);
+                const value = this.vm[name];
+                console.log(value);
+                this.updateText(node, value);
+                new Watcher(this.vm, name, (newValue) => {
+                    console.log(newValue);
+                    this.updateText(node, newValue);
+                });
+            }
+            updateText(node, value) {
+                node.textContent = typeof value !== 'undefined' ? value : '';
+            }
+        }
+        function initData(vm) {
+            const sharedPropertyDefinition = {
+                configurable: true,
+                enumerable: true,
+            }
+            const proxy = (target, sourceKey, key) => {
+                sharedPropertyDefinition.get = () => {
+                    return target[sourceKey][key];
+                }
+                sharedPropertyDefinition.set = (val) => {
+                    target[sourceKey][key] = val;
+                }
+                Object.defineProperty(target, key, sharedPropertyDefinition);
+            }
+            Object.keys(vm._data).forEach((key) => proxy(vm, '_data', key));
+        }
+        function Vue(options) {
+            this.$el = options.el;
+            this._data = options.data;
+            initData(this);
+            this.methods = options.methods;
+            observe(this._data);
+            new Compile(this);
+        }
+    </script>
+    <script>
+        const test = new Vue({
+            el: document.querySelector('#app'),
+            data: {
+                name: '欢饮是阿斯蒂芬'
+            }
+        })
+        setTimeout(() => {
+            test.name = '沙发撒沙发斯蒂芬';
+        }, 3000)
+    </script>    
+</body>
+</html>

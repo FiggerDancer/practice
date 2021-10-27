@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function Parent() {
+            this.name = 'parent';
+            this.play = [1, 2, 3];
+        }
+        function Child() {
+            Parent.call(this);
+            this.type = 'child';
+        }
+        Child.prototype = new Parent();
+        const s3 = new Child();
+        const s4 = new Child();
+        s3.play.push(4);
+        console.log(s3.play, s4.play);
+        // 新问题  Parent 构造函数多执行一次 Child.prototype = new Parent()
+    </script>
+</body>
+</html>
