@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .box {
+        width: 256px;
+        height: 256px;
+        border-bottom: 1px dashed #ccc;
+        margin: auto;
+        text-align: justify;
+    }
+    .bar {
+        width: 20px;
+        display: inline-block;
+        background: #fee;
+        height: 20px;
+    }
+    /* 利用高100%将元素放到底部 */
+    .box:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+    }
+    /* 利用宽100%使元素的宽度占位100% */
+    .box:after {
+        content: '';
+        display: inline-block;
+        width: 100%;
+    }
+</style>
+<body>
+    <!-- 要尤其注意这里的空格和换行，这些都是text-align:justify -->
+    <div class="box"><i class="bar"></i>
+        <i class="bar"></i>
+        <i class="bar"></i>
+        <i class="bar"></i></div>
+    <script>
+
+    </script>
+</body>
+</html>

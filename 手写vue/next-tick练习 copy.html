@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let isIOS = false;
+        let count = 0;
+        const isNative = (fn) => /native code/.test(fn.toString());
+        let timerFunc;
+        let pending = false;
+        let useMicroTask = true;
+        const callbacks = [];
+        const noop = () => {};
+
+        const flushCallbacks = () => {
+            pending = false;
+            const copies = callbacks.slice();
+            callbacks.length = 0;
+            for (let i = 0, l = copies.length; i < l; i++) {
+                try {
+                    copies[i]();
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+        }
+        
+        if (typeof Promise !== 'undefined' && isNative(Promise)) {
+            const p = Promise.resolve();
+            timerFunc = () => {
+                p.then(() => {
+                    flushCallbacks();
+                    if (isIOS) {
+                        setTimeout(noop);
+                    }
+                })
+            }
+            useMicroTask = false;
+        } else if (typeof MutationServer !== 'undefined' && isNative(MutationObserver)) {
+            let count = 0;
+            const observer = new MutationObserver(flushCallbacks);
+            const textNode = document.createTextNode(String(count));
+            observer.observe(textNode, { characterData: true});
+            timerFunc = () => {
+                textNode.textContent = (count = ++count % 2);
+            }
+            useMicroTask = false;
+        } else {
+            setTimeout(flushCallbacks);
+        }
+
+        function nextTick(cb, ctx) {
+            let _resolve;
+            callbacks.push(() => {
+                try {
+                    if (cb) {
+                        cb.call(ctx);   
+                    } else if (_resolve) {
+                        _resolve();
+                    }
+                } catch(e) {
+                    console.error(e);
+                }
+            });
+            if (!pending) {
+                pending = true;
+                flushCallbacks();
+            }
+            if (typeof Promise !== 'undefined' && typeof Promise.then === 'function') {
+                return new Promise(resolve => _resolve = resolve);
+            }
+        }
+    </script>
+</body>
+</html>

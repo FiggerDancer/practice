@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 防抖
+        function debounce(fn, delay = 0) {
+            let timer;
+            return function(...rest) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    fn.call(this, ...rest);
+                    timer = null;
+                }, delay);
+            }
+        }
+        // 节流
+        function throttle(fn, delay = 0) {
+            let timer;
+            return function(...rest) {
+                if (timer) {
+                    return;
+                }
+                fn.call(this, ...rest);
+                timer = setTimeout(() => {
+                    timer = null;
+                }, delay);
+            }
+        }
+        // 深拷贝
+        function getType(target) {
+            return Reflect.prototype.toString.call(target);
+        }
+        function isObject(target) {
+            return (typeof target === 'function' || typeof target === 'object') && target !== null;
+        }
+        function fnHandle(target) {
+            const fnStr = target.toString();
+            const bodyReg = /(?<={)(.|\n)*(?=})/m;
+            const paramReg = /(?<=\().+(?=\)\s*{)/;
+            const params = paramReg.exec(fnStr);
+            const body = bodyReg.exec(fnStr);
+            if (!body) return;
+            if (params) {
+                const paramArr = params[0]?.split(',');
+                return new Function(...paramArr, body[0]);
+            }
+            return new Function(body[0]);
+        }
+        function noTraverseHandle(type, target) {
+            const Ctor = target.constructor;
+            switch(type) {
+                case '[object Boolean]':
+                    return new Object(Boolean.prototype.valueOf.call(target));
+                case '[object String]':
+                    return new Object(String.prototype.valueOf.call(target));
+                case '[object Number]':
+                    return new Object(Number.prototype.valueOf.call(target));
+                case '[object Symbol]':
+                    return new Object(Symbol.prototype.valueOf.call(target));
+                case '[object Date]': 
+                case '[object Error]':
+                    return new Ctor(target);
+                case '[object RegExp]':
+                    return new RegExp(target.source, target.flags);
+                case '[object Function]':
+                    return fnHandle(target);
+                default:
+                    return new Ctor(target);
+            }
+        }
+        const canTraverse = {
+            '[object Map]': true,
+            '[object Set]': true,
+            '[object Arguments]': true,
+            '[object Array]': true,
+            '[object Object]': true,
+        };
+        function deepClone(target, map = new WeakMap()) {
+            if (!isObject(target)) {
+                return target;
+            }
+            const type = getType(target);
+            let cloneTarget;
+            if (!canTraverse[type]) {
+                noTraverseHandle(type, target);
+            } else {
+                const Ctor = target.constructor;
+                cloneTarget = new Ctor();
+            }
+            if (cloneTarget = map.get(target)) {
+                return cloneTarget;
+            }
+            if (type === '[object Map]') {
+                target.forEach((item, key) => {
+                    cloneTarget.set(deepClone(key), deepClone(item));
+                });
+            } else if (type === '[object Set]') {
+                target.forEach((key) => {
+                    cloneTarget.add(deepClone(key), deepClone(item));
+                });
+            } else {
+                for (let i in target) {
+                    if (!Reflect.prototype.hasOwnProperty.call(target)) continue;
+                    cloneTarget[i] = target[i];
+                }
+            }
+            map.set(target, cloneTarget);
+            return cloneTarget;
+        }
+    </script>
+</body>
+</html>

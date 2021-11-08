@@ -19,6 +19,7 @@
         function flushCallbacks() {
             pending = false;
             const copies = callbacks.slice();
+            callbacks.length = 0;
             for (let i = 0, l = copies.length; i < l; i++) {
                 copies[i]();
             }

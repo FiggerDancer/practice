@@ -29,7 +29,7 @@
         }
         // Object.create
         Object.create2 = function(proto, property) {
-            if (typeof proto !== 'object' || typeof proto !== 'function') {
+            if (typeof proto !== 'object' && typeof proto !== 'function') {
                 throw new TypeError();
             }
             if (property === null) {
@@ -70,6 +70,72 @@
             delete ctx[fn];
             return result;
         }
+    </script>
+    <script>
+         // 继承
+         function C () {
+            this.name = 'C';
+         }
+         C.prototype.say = function() {
+            console.log(`say Hello ${this.name}`);
+         }
+         function D () {
+             this.name = 'D';
+         }
+         function inherit(c, p) {
+            c.prototype = Object.create(p.prototype);
+            c.prototype.constructor = c;
+         }
+         function inherit2(c, p) {
+            function F() {};
+            F.prototype = p.prototype;
+            F.prototype.constructor = c;
+            c.prototype = new F();
+         }
+         // create
+         Object.create3 = function(proto, propertyObject = undefined) {
+            if ((typeof proto !== 'object' && typeof proto !== 'function')) {
+                throw new TypeError();
+            }
+            if (propertyObject === null) {
+                throw new TypeError();
+            }
+            function F() {}
+            F.prototype = proto.prototype;
+            const obj = new F();
+            if (propertyObject !== undefined) {
+                Object.defineProperties(o, propertyObject);
+            }
+            if (proto === null) {
+                obj.__proto__ = null;
+            }
+            return obj;
+         }
+         // bind
+         Function.prototype.bind1 = function(ctx, ...args) {
+            const self = this;
+            const fn = function(...rest) {
+                return self.apply(this instanceof self ? this : ctx, [...args, ...rest]);
+            }
+            fn.prototype = Object.create(self.prototype);
+            return fn;
+         }
+         // apply
+         Function.prototype.apply1 = function(ctx, args) {
+            const fn = Symbol('fn');
+            ctx[fn] = this;
+            const result = ctx[fn](...args);
+            delete ctx[fn];
+            return result;
+         }
+         // call
+         Function.prototype.call1 = function(ctx, ...args) {
+            const fn = Symbol('fn');
+            ctx[fn] = this;
+            const result = ctx[fn](...args);
+            delete ctx[fn];
+            return result;
+         }
     </script>
 </body>
 </html>

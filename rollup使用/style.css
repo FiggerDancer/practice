@@ -1,0 +1,9 @@
+body {
+    background: #ffe;
+}
+
+.container {
+    background: #eff;
+    width: 40px;
+    height: 40px;
+}

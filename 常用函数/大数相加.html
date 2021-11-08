@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function add(num1, num2) {
+            let numStr1 = num1.toString();
+            let numStr2 = num2.toString();
+            const len1 = numStr1.length;
+            const len2 = numStr2.length;
+            const len = Math.max(len1, len2);
+            numStr1 = numStr1.padStart(len, '0');
+            numStr2 = numStr2.padStart(len, '0');
+            const arr1 = numStr1.split('');
+            const arr2 = numStr2.split('');
+            const arr3 = new Array(len);
+            let c = 0;
+            for (let i = len - 1; i >= 0; i--) {
+                const a = arr1[i] - 0;
+                const b = arr2[i] - 0;
+                const sum = a + b + c;
+                console.log(sum);
+                const v = sum % 10;
+                c = Math.floor(sum / 10);
+                arr3[i] = v;
+            }
+            return c !== 0 ? `${c}${arr3.join('')}` : arr3.join('');
+        }
+        console.log(add(1, 1111))
+    </script>
+</body>
+</html>

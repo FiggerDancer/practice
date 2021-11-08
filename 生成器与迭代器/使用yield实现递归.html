@@ -9,10 +9,10 @@
 <body>
     <script>
         const arr = [];
-        function * nTimes(n) {
-            if (n > 0) {
-                yield * nTimes(n - 1);
-                yield n - 2;
+        function *nTimes(n) {
+            while (n > 0) {
+                yield nTimes(n - 1);
+                yield n--;
             }
         }
         for (const v of nTimes(10)) {
