@@ -8,9 +8,6 @@ import asyncModal from './components/asyncComponent.js'
 <div>
  <img alt="Vue logo" src="./assets/logo.png" />
   <asyncModal msg="Hello Vue 3 + TypeScript + Vite" />
-  <div class="">
-
-  </div>
 </div>
  
 </template>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 继承
+        function A() {
+            this.name = 'li';
+        }
+        A.prototype.say = function() {console.log(`hello ${this.name}`)};
+        function B() {
+            A.call(this);
+            this.age = 17;
+        }
+        function inherit(C, P) {
+            function F() {};
+            F.prototype = P.prototype;
+            F.prototype.constructor = C;
+            C.prototype = new F();
+        }
+        function inherit2(C, P) {
+            C.prototype = Object.create(P.prototype);
+            C.prototype.constructor = C;
+        }
+        // Object.create
+        Object.create2 = function(proto, propertyObject) {
+            if ((typeof proto !== 'function' && typeof proto !== 'object')) {
+                throw new Error();
+            }
+            if (propertyObject === null) {
+                throw new Error();
+            }
+            function F() {};
+            F.prototype = proto.prototype;
+            const obj = new F();
+            if (typeof propertyObject !== 'undefined') {
+                Object.defineProperties(obj, propertyObject);
+            }
+            if (proto === null) {
+                obj.__proto__ = null;
+            }
+            return obj;
+        }
+        // bind
+        function bind(ctx, ...args) {
+            const self = this;
+            const fn = function(...rest) {
+                return self.apply(this instanceof self ? this : ctx, [...args, ...rest]);
+            }
+            fn.prototype = Object.create(self.prototype);
+            return fn;
+        }
+        // call apply
+        function call(ctx, ...args) {
+            const fn = Symbol('fn');
+            ctx[fn] = this;
+            const result = ctx[fn](...args);
+            delete ctx[fn];
+            return result;
+        }
+
+        function apply(ctx, args) {
+            const fn = Symbol('fn');
+            ctx[fn] = this;
+            const result = ctx[fn](...args);
+            delete ctx[fn];
+            return result;
+        }
+    </script>
+</body>
+</html>
